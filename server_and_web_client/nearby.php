@@ -1,0 +1,196 @@
+<?php
+
+/*** begin the session ***/
+session_start();
+
+if(!isset($_SESSION['user_id']))
+{
+    $message = 'You must be logged in to access this page';
+    
+}
+else
+{
+    try
+    {
+        /*** connect to database ***/
+       
+      define( "DB_SERVER",    getenv('OPENSHIFT_MYSQL_DB_HOST') );
+      define( "DB_USER",      getenv('OPENSHIFT_MYSQL_DB_USERNAME') );
+      define( "DB_PASSWORD",  getenv('OPENSHIFT_MYSQL_DB_PASSWORD') );
+      define( "DB_DATABASE",  getenv('OPENSHIFT_APP_NAME') );
+      $link = mysql_connect(DB_SERVER,DB_USER,DB_PASSWORD) or die('connect to sql fail');
+      mysql_select_db('ezride') or die('Select DB ezride fail.');  
+      $query = "SELECT * FROM userinfo WHERE userid='" . $_SESSION['user_id'] . "'";
+      $result = mysql_query($query) or die('ezlogin query fail');
+      $row = mysql_fetch_array($result);
+      if(mysql_num_rows($result) == 0){
+          echo "fail to find user";
+      }else{
+              $ezuser_username = $row['username'];
+      }
+      
+
+
+    }
+    catch (Exception $e)
+    {
+        /*** if we are here, something is wrong in the database ***/
+        $message = 'We are unable to process your request. Please try again later"';
+    }
+}
+
+?>
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Asynchronous Loading</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="ico/favicon.png">
+
+    <title>EZRide!</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <link href="nav.css" rel="stylesheet">
+    
+    <script src="js/jquery-2.0.3.min.js"></script>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <style>
+      html, body{
+        height: 100%;
+        margin: 0px;
+        padding: 0px;
+
+      }
+       #map-canvas {
+        margin-top: 30px;
+        height:500px;
+       }
+    </style>
+    <script>
+    var map;
+function initialize() {
+  var mapOptions = {
+    zoom: 15,
+    center: new google.maps.LatLng(-34.397, 150.644),
+    mapTypeId: google.maps.MapTypeId.ROADMAP
+  };
+
+  map = new google.maps.Map(document.getElementById('map-canvas'),
+      mapOptions);
+  getLocation();
+}
+
+function loadScript() {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src = 'https://maps.googleapis.com/maps/api/js?key=YOUR_KEY_HERE&sensor=true&' +
+      'callback=initialize';
+  document.body.appendChild(script);
+}
+
+window.onload = loadScript;
+
+
+function getLocation()
+  {
+  if (navigator.geolocation)
+    {
+    navigator.geolocation.getCurrentPosition(showPosition);
+    }
+  else{console.log("Geolocation is not supported by this browser.");}
+  }
+function showPosition(position)
+  {
+
+    var pos = new google.maps.LatLng(position.coords.latitude,
+                                           position.coords.longitude);
+      var marker = new google.maps.Marker({
+        animation: google.maps.Animation.DROP,
+        position: pos,
+        map:map
+      })
+
+    map.setCenter(pos);
+
+  }
+</script>
+
+  </head>
+ <body>
+
+  <div id="fb-root"></div>
+       
+  <?php include 'header.php'; ?>
+    
+
+  <?php if ($user || $ezuser_username || isset($_SESSION['gplusuer'])): ?>
+  
+    <div class="container main " style="padding-top:53px; height:100%;">
+      <!-- Example row of columns -->
+     <div class="row">
+      <div class="col-md-3">
+
+        <div class="bs-sidebar hidden-print affix-top" role="complementary">
+         
+         <ul class="nav bs-sidenav">
+            <li class="side-li"><a href="index.php">All Groups</a></li>
+            <li class="side-li"><a href="mygroups.php">My Groups</a></li>
+            <li class="side-li"><a href="gcal.php">Calendar</a></li>
+            <li class="side-li"><a class="active" href="nearby.php">Nearby</a></li>
+            <li class="side-li"><a href="profile.php">Profile</a></li>
+            
+          </ul>
+
+        </div>
+      </div>
+
+       <div class="col-md-9">
+        <div class="bs-sidebar hidden-print affix-top" role="complementary">
+         <div id="map-canvas" class="well"></div>
+        </div>
+
+      </div>
+
+     </div>
+    
+    </div>
+
+  <?php else: 
+    
+    echo "Sigin in first";
+
+  ?>
+   <!-- /container -->
+      
+  <?php endif?>
+     
+  
+
+  
+
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+     <script>
+      $(document).ready(function() {
+
+
+
+      });
+
+
+    </script>
+    <script src="js/bootstrap.min.js"></script>
+  </body>
+  <?php if ($user || $ezuser_username || isset($_SESSION['gplusuer'])): ?>
+    <?php else: ?>
+      <link href="home.css" rel="stylesheet">
+    <?php endif?>
+</html>
