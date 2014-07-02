@@ -1,5 +1,5 @@
-CS307_Purdue_Project
-====================
+EZRide - CS307 Project at Purdue
+================================
 
 The project my team created in CS307 at Purdue in the Fall of 2013. The project aimed to create a service that allowed users
 to create groups and share their calendars. This would allow the users to more easily schedule events and outings involving
